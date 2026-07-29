@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Playbook CS - Klasifikasi Kendala Motor</title>
+<style>
+  :root{
+    --bg:#eef1f5; --panel:#ffffff; --ink:#1c2430; --sub:#6b7686; --line:#e4e8ee;
+    --storing:#1f9d55; --storing-soft:#e6f6ec;
+    --towing:#2563c9; --towing-soft:#e8f0fd;
+    --edukasi:#c9820f; --edukasi-soft:#fdf3e2;
+    --radius:14px; --shadow:0 1px 3px rgba(20,30,50,.06), 0 8px 24px -12px rgba(20,30,50,.12);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Segoe UI',Inter,system-ui,-apple-system,Arial,sans-serif;padding:20px;}
+  .wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:16px;}
+
+  .header{background:linear-gradient(135deg,#1c2b4a,#25406f);border-radius:var(--radius);color:#fff;padding:20px 24px;box-shadow:var(--shadow);}
+  .header h1{margin:0 0 4px 0;font-size:20px;}
+  .header p{margin:0;font-size:12.5px;opacity:.85;}
+
+  .toolbar{background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .toolbar input[type=text]{flex:1;min-width:220px;border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:13.5px;}
+  .filter-btn{border:1px solid var(--line);background:#fafbfd;color:var(--ink);border-radius:20px;padding:7px 14px;font-size:12.5px;cursor:pointer;font-weight:600;}
+  .filter-btn.active[data-f="all"]{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .filter-btn.active[data-f="Storing"]{background:var(--storing);color:#fff;border-color:var(--storing);}
+  .filter-btn.active[data-f="Towing"]{background:var(--towing);color:#fff;border-color:var(--towing);}
+  .filter-btn.active[data-f="Edukasi"]{background:var(--edukasi);color:#fff;border-color:var(--edukasi);}
+  .btn{border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;background:var(--ink);color:#fff;}
+  .btn:hover{opacity:.9;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .count-pill{font-size:11.5px;color:var(--sub);margin-left:auto;}
+
+  .list{display:flex;flex-direction:column;gap:10px;}
+  .card{background:var(--panel);border-radius:12px;box-shadow:var(--shadow);padding:14px 18px;border-left:5px solid var(--line);}
+  .card.Storing{border-left-color:var(--storing);}
+  .card.Towing{border-left-color:var(--towing);}
+  .card.Edukasi{border-left-color:var(--edukasi);}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .card-title{font-weight:700;font-size:14.5px;}
+  .badge{font-size:10.5px;font-weight:800;padding:4px 10px;border-radius:20px;white-space:nowrap;letter-spacing:.3px;text-transform:uppercase;}
+  .badge.Storing{background:var(--storing-soft);color:var(--storing);}
+  .badge.Towing{background:var(--towing-soft);color:var(--towing);}
+  .badge.Edukasi{background:var(--edukasi-soft);color:var(--edukasi);}
+  .sistem-tag{font-size:11px;color:var(--sub);margin-top:2px;}
+  
+  /* Section Header for Textarea with Copy Button */
+  .section-header{display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
+  .explain-lbl{font-size:11px;color:var(--sub);font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
+  .copy-btn{font-size:10.5px;border:1px solid var(--line);background:#fff;padding:3px 8px;border-radius:5px;cursor:pointer;color:var(--ink);font-weight:600;transition:all 0.2s;}
+  .copy-btn:hover{background:var(--ink);color:#fff;}
+  .copy-btn.copied{background:var(--storing);color:#fff;border-color:var(--storing);}
+
+  .explain-textarea, .edu-box textarea{
+    width:100%; border:1px solid var(--line); border-radius:8px; padding:8px 10px; 
+    font-size:12.5px; font-family:inherit; resize:vertical; min-height:54px; margin-top:4px;
+    white-space: pre-wrap;
+  }
+  .explain-textarea:focus, .edu-box textarea:focus{ outline:none; border-color:var(--ink); background:#fafbfd; }
+
+  .row-actions{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;}
+  .mini-btn{font-size:11.5px;border:1px solid var(--line);background:#fafbfd;padding:5px 10px;border-radius:7px;cursor:pointer;color:var(--ink);}
+  .mini-btn.danger{color:#e0433a;border-color:#f4d3d1;}
+  
+  /* Media Grid Gallery */
+  .media-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));gap:10px;margin-top:10px;}
+  .media-item{border-radius:8px;overflow:hidden;border:1px solid var(--line);background:#000;display:flex;flex-direction:column;position:relative;}
+  
+  .media-item img, .media-item video{
+    width:100%;
+    height:160px;
+    object-fit:contain;
+    background:#000;
+    display:block;
+  }
+  
+  .del-media-bar{background:#111;padding:4px 6px;display:flex;justify-content:flex-end;}
+  .btn-del-media{background:#e0433a;color:#fff;border:none;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;}
+  .btn-del-media:hover{background:#c0392b;}
+
+  .file-input{display:none;}
+
+  /* Form Tambah */
+  .addform{background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px;display:none;flex-direction:column;gap:10px;}
+  .addform.open{display:flex;}
+  .addform label{font-size:12px;color:var(--sub);font-weight:700;display:flex;flex-direction:column;gap:4px;}
+  .addform input[type=text], .addform select, .addform textarea{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;}
+  .addform-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .addform-row > *{flex:1;min-width:180px;}
+
+  .empty{text-align:center;color:var(--sub);font-size:13px;padding:30px 0;}
+  .status{font-size:12px;padding:4px 10px;border-radius:8px;display:none;}
+  .status.ok{background:var(--storing-soft);color:var(--storing);display:inline-block;}
+  footer{text-align:center;font-size:11px;color:var(--sub);padding:8px 0 16px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <h1>📘 Playbook Customer Service — Klasifikasi Kendala Motor</h1>
+    <p>Data tersimpan otomatis di IndexedDB (Mendukung Banyak Foto & Video Sekaligus).</p>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" id="searchBox" placeholder="Cari kendala... (mis: tali gas, ban bocor, rem, kunci)">
+    <button class="filter-btn active" data-f="all">Semua</button>
+    <button class="filter-btn" data-f="Storing">📦 Storing</button>
+    <button class="filter-btn" data-f="Towing">🚛 Towing</button>
+    <button class="filter-btn" data-f="Edukasi">🎓 Edukasi</button>
+    <span class="count-pill" id="countPill"></span>
+    <button class="btn" id="toggleAddBtn">+ Tambah Kendala</button>
+    <button class="mini-btn" id="resetBtn" style="border-color:#f4d3d1;color:#e0433a;">🔄 Muat Data Resmi</button>
+  </div>
+
+  <div class="addform" id="addForm">
+    <div class="addform-row">
+      <label>Nama Kendala
+        <input type="text" id="f-kendala" placeholder="mis: Ban bocor karena velg bengkok">
+      </label>
+      <label>Kategori Sistem (opsional)
+        <input type="text" id="f-sistem" placeholder="mis: Ban & Roda">
+      </label>
+    </div>
+    <div class="addform-row">
+      <label>Action Category
+        <select id="f-kategori">
+          <option value="Storing">Storing</option>
+          <option value="Towing">Towing</option>
+          <option value="Edukasi">Edukasi</option>
+        </select>
+      </label>
+      <label>Lampiran Multiple (Pilih Banyak Foto/Video Sekaligus)
+        <input type="file" id="f-media" accept="image/*,video/*" multiple>
+      </label>
+    </div>
+    <label>Explanation (penjelasan penanganan)
+      <textarea id="f-explain" rows="2" placeholder="Jelaskan tindakan/alasan kategori ini..."></textarea>
+    </label>
+    <label id="f-edu-label" style="display:none;">Template Edukasi (khusus kategori Edukasi)
+      <textarea id="f-edutemplate" rows="2" placeholder="Naskah edukasi yang bisa dikirim ke driver..."></textarea>
+    </label>
+    <div class="row-actions">
+      <button class="btn" id="saveNewBtn">Simpan Kendala</button>
+      <button class="mini-btn" id="cancelAddBtn">Batal</button>
+      <span class="status" id="addStatus"></span>
+    </div>
+  </div>
+
+  <div class="list" id="list"></div>
+  <div class="empty" id="emptyMsg" style="display:none;">Tidak ada kendala yang cocok dengan pencarian.</div>
+
+  <footer>Playbook CS — Multiple Upload & One-Click Copy Ready.</footer>
+</div>
+
+<script>
+const KEY_ITEMS = 'playbook:items';
+let allItems = [];
+let currentFilter = 'all';
+let currentSearch = '';
+
+// --- DATABASE INDEXEDDB ---
+const DB_NAME = 'PlaybookMediaDB_V2';
+const DB_STORE = 'media_files';
+
+function openDB(){
+  return new Promise((resolve, reject)=>{
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = (e)=>{
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains(DB_STORE)){
+        db.createObjectStore(DB_STORE);
+      }
+    };
+    req.onsuccess = ()=> resolve(req.result);
+    req.onerror = ()=> reject(req.error);
+  });
+}
+
+async function getMediaDB(id){
+  const db = await openDB();
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction(DB_STORE, 'readonly');
+    const req = tx.objectStore(DB_STORE).get(id);
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function addMediaDB(id, newFiles){
+  const existingFiles = await getMediaDB(id);
+  const updatedList = [...existingFiles, ...newFiles];
+  
+  const db = await openDB();
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction(DB_STORE, 'readwrite');
+    tx.objectStore(DB_STORE).put(updatedList, id);
+    tx.oncomplete = () => resolve(updatedList);
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function deleteSingleMediaDB(id, mediaIndex){
+  const existingFiles = await getMediaDB(id);
+  existingFiles.splice(mediaIndex, 1);
+  
+  const db = await openDB();
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction(DB_STORE, 'readwrite');
+    tx.objectStore(DB_STORE).put(existingFiles, id);
+    tx.oncomplete = () => resolve(existingFiles);
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function deleteAllMediaDB(id){
+  const db = await openDB();
+  return new Promise((resolve, reject)=>{
+    const tx = db.transaction(DB_STORE, 'readwrite');
+    tx.objectStore(DB_STORE).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// Seed data resmi (auto-generated dari hasil edit)
+const SEED = [
+  {
+    "sistem": "",
+    "kendala": "Tali gas putus",
+    "kategori": "Storing",
+    "explain": "Pergantian tali gas.",
+    "edu": "",
+    "id": "k1784705444982oadvf"
+  },
+  {
+    "sistem": "",
+    "kendala": "Tali gas putus",
+    "kategori": "Towing",
+    "explain": "Jika diluar jam kerja (07:00-23:00).",
+    "edu": "",
+    "id": "k1784705444982gt6z9"
+  },
+  {
+    "sistem": "",
+    "kendala": "E15 (Hall Gas) - Gas tidak berfungsi",
+    "kategori": "Edukasi",
+    "explain": "Buat Video: panduan menarik tuas gas perlahan beberapa kali terlebih dahulu sebelum eskalasi.",
+    "edu": "Halo Bapak/Ibu, terkait kendala kode E15 yang muncul pada layar speedometer, kami sarankan untuk mencoba menarik tuas gas secara perlahan beberapa kali terlebih dahulu. Silakan mengikuti panduan pada video berikut: 
+
+https://drive.google.com/file/d/1fT5UfPvlPKfNMcTJhQM9VJTlrWS383ne/view
+
+Apabila setelah mengikuti panduan tersebut kendala masih muncul, mohon informasikan kembali kepada kami agar kami dapat membantu melakukan pengecekan lebih lanjut. Terima kasih.",
+    "id": "k1784705444982dtc5w"
+  },
+  {
+    "sistem": "",
+    "kendala": "E15 (Hall Gas) - Gas tidak berfungsi",
+    "kategori": "Storing",
+    "explain": "Pergantian part (Hall Gas and/or Tali Gas).",
+    "edu": "",
+    "id": "k1784705444982x09z4"
+  },
+  {
+    "sistem": "",
+    "kendala": "E15 (Hall Gas) - Gas tidak berfungsi",
+    "kategori": "Towing",
+    "explain": "- Jika diluar jam kerja (07:00-23:00) 
+- Unsolved oleh Storing karena Main Cable Short (Heavy Repair)",
+    "edu": "",
+    "id": "k1784705444982op8qt"
+  },
+  {
+    "sistem": "",
+    "kendala": "Mode / Kode P",
+    "kategori": "Edukasi",
+    "explain": "-Video 1: Edukasi Mode 
+https://drive.google.com/file/d/1EKT2opAbXsURBZtuEs0FGKLzBoW9JmM0/view?usp=sharing
+
+-Video 2: Edukasi Mode P (sensor standar samping)
+https://drive.google.com/file/d/1y2qU9MP57AUjLKDb4gbHjxPS0u40mODy/view?usp=sharing",
+    "edu": "Untuk saat ini mohon kesediaan untuk baterai bisa dikeluarkan terlebih dahulu ya Pak dari motornya kurang lebih 5-10 menit Pak. Kemudian setelah kurang lebih 5-10 menit Bapak bisa mencoba memasukan kembali baterainya ke motornya.
+
+Jika belum bisa silahkan Bapak/Ibu buka link pada video berikut:
+Video 1 (Membersihkan Port Battery): Edukasi Mode P.mp4
+Video 2 (Potong Kabel Sensor Standar 1 / Standar Samping): Edukasi Mode P (sensor st...).mp4
+
+Apabila kendala masih muncul setelah dicoba, silakan informasikan kembali kepada kami agar dapat kami bantu pengecekan lebih lanjut.",
+    "id": "k1784705444982irp6n"
+  },
+  {
+    "sistem": "",
+    "kendala": "Mode / Kode P",
+    "kategori": "Storing",
+    "explain": "- Cleaning port
+- Cut sensor side stand
+- Pergantian controller",
+    "edu": "",
+    "id": "k1784705444982kotkd"
+  },
+  {
+    "sistem": "",
+    "kendala": "Mode / Kode P",
+    "kategori": "Towing",
+    "explain": "- Jika diluar jam kerja (07:00-23:00)
+- Unsolved oleh Storing karena Main Cable Short (Heavy Repair)
+- Unsolved oleh Storing karena Port Battery Rusak (Heavy Repair)",
+    "edu": "",
+    "id": "k1784705444982rj52e"
+  },
+  {
+    "sistem": "",
+    "kendala": "E28 (Sensor Rem)",
+    "kategori": "Edukasi",
+    "explain": "Kode E28
+
+https://drive.google.com/file/d/1FFxZN-fYn9GRM3HcHyOEQjlQWDCn6uXn/view?usp=sharing",
+    "edu": "Mohon kesediaan Bapak/Ibu untuk mengikuti panduan pada video berikut dan melakukan langkah-langkah sesuai dengan informasi yang disampaikan. 
+
+https://drive.google.com/file/d/1FFxZN-fYn9GRM3HcHyOEQjlQWDCn6uXn/view?usp=sharing
+
+Apabila setelah mengikuti panduan tersebut kendala masih terjadi, mohon informasikan kembali kepada kami. Selanjutnya, kami akan meneruskan laporan Bapak/Ibu kepada tim terkait untuk dilakukan pengecekan lebih lanjut. Terima kasih.",
+    "id": "k17847054449822wye8"
+  },
+  {
+    "sistem": "",
+    "kendala": "E28 (Sensor Rem)",
+    "kategori": "Storing",
+    "explain": "Perbaikan switch rem.",
+    "edu": "",
+    "id": "k1784705444982ev8y7"
+  },
+  {
+    "sistem": "",
+    "kendala": "E28 (Sensor Rem)",
+    "kategori": "Towing",
+    "explain": "Jika diluar jam kerja (07:00-23:00).",
+    "edu": "",
+    "id": "k1784705444982hzdxv"
+  },
+  {
+    "sistem": "",
+    "kendala": "Indikator Battery 00%",
+    "kategori": "Edukasi",
+    "explain": "Jika masih bisa jalan, diarahkan ke pool Pondok Indah. Agent input Apsheet dan ticket eskalasikan ke Admin ERA.",
+    "edu": "Bapak/Ibu, apakah saat ini motor masih dapat digunakan atau dijalankan?
+
+Apabila masih bisa, mohon kesediaan Bapak/Ibu untuk datang ke Bengkel Electrum Pondok Indah agar motor dapat dilakukan pemeriksaan lebih lanjut oleh tim teknisi kami. Terima kasih.",
+    "id": "k1784705444982tbj0c"
+  },
+  {
+    "sistem": "",
+    "kendala": "Indikator Battery 00%",
+    "kategori": "Storing",
+    "explain": "Pergantian controller.",
+    "edu": "",
+    "id": "k17847054449820cdef"
+  },
+  {
+    "sistem": "",
+    "kendala": "Indikator Battery 00%",
+    "kategori": "Towing",
+    "explain": "Jika diluar jam kerja (07:00-23:00).",
+    "edu": "",
+    "id": "k1784705444982wkeee"
+  },
+  {
+    "sistem": "",
+    "kendala": "Pentil sobek",
+    "kategori": "Storing",
+    "explain": "Pengantaran pentil ke lokasi.",
+    "edu": "",
+    "id": "k17847054449823oijg"
+  },
+  {
+    "sistem": "",
+    "kendala": "Pentil sobek",
+    "kategori": "Towing",
+    "explain": "Jika diluar jam kerja (07:00-23:00).",
+    "edu": "",
+    "id": "k17847054449826hr93"
+  },
+  {
+    "sistem": "",
+    "kendala": "Batre tidak ada koneksi ke motor",
+    "kategori": "Edukasi",
+    "explain": "Pengecekan port battery (Basah / Kotor / Ada Benda).",
+    "edu": "Bapak/Ibu, mohon memastikan port baterai dalam kondisi bersih, kering, dan tidak terdapat benda asing yang menghalangi.
+
+Apabila masih mengalami kendala, silakan melakukan penukaran baterai di BSS terdekat terlebih dahulu.
+
+Jika setelah penukaran baterai kendala masih terjadi, mohon informasikan kembali kepada kami agar dapat kami bantu melakukan pengecekan lebih lanjut. Terima kasih.",
+    "id": "k1784705444982pxzhm"
+  },
+  {
+    "sistem": "",
+    "kendala": "Batre tidak ada koneksi ke motor",
+    "kategori": "Storing",
+    "explain": "- Pengecekan battery dengan cara menggunakan battery dari mekanik storing
+- Jika berhasil maka diarahkan atau dibantu stut untuk swapping manual ke BSS terdekat dengan bantuan CT
+- Jika tidak berhasil, maka Towing",
+    "edu": "",
+    "id": "k1784705444982848vi"
+  },
+  {
+    "sistem": "",
+    "kendala": "Batre tidak ada koneksi ke motor",
+    "kategori": "Towing",
+    "explain": "- Jika diluar jam kerja (07:00-23:00)
+- Unsolved oleh Storing karena kerusakan pada port battery",
+    "edu": "",
+    "id": "k17847054449827d8o8"
+  },
+  {
+    "sistem": "",
+    "kendala": "Kunci hilang",
+    "kategori": "Storing",
+    "explain": "Pergantian lock seat.",
+    "edu": "",
+    "id": "k1784705444982utlf5"
+  },
+  {
+    "sistem": "",
+    "kendala": "Kunci hilang",
+    "kategori": "Towing",
+    "explain": "Jika diluar jam kerja (07:00-23:00).",
+    "edu": "",
+    "id": "k1784705444982rjkju"
+  },
+  {
+    "sistem": "",
+    "kendala": "Rem blong",
+    "kategori": "Edukasi",
+    "explain": "Minta video untuk validasi rem loss (Tuas Rem menyentuh Grip Gas baik bagian depan dan bagian belakang). Jika benar loss, lanjut Towing. Jika tidak, arahkan ke pool terdekat.",
+    "edu": "Halo Bapak/Ibu, mohon bantu mengirimkan video yang memperlihatkan kondisi rem motor saat ini ya.
+
+Apabila dari video terlihat bahwa rem tidak berfungsi dengan baik (rem blong atau tidak pakem), kami akan membantu mengajukan proses towing.
+
+Namun, apabila kondisi rem masih memungkinkan untuk digunakan, kami akan mengarahkan Bapak/Ibu untuk membawa motor ke pool atau bengkel Electrum terdekat agar dapat dilakukan pengecekan lebih lanjut. Terima kasih.",
+    "id": "k1784705444982dl5sx"
+  },
+  {
+    "sistem": "",
+    "kendala": "Rem blong",
+    "kategori": "Towing",
+    "explain": "- Jika diluar jam kerja (07:00-23:00)
+- Unsolved di education jika CS L2 Bike sudah validasi rem loss dan unit tidak aman dikendarai",
+    "edu": "",
+    "id": "k1784705444982xpnk9"
+  },
+  {
+    "sistem": "",
+    "kendala": "Rem macet",
+    "kategori": "Storing",
+    "explain": "Repair bleeding rem (menguras angin pada kaliper).",
+    "edu": "",
+    "id": "k1784705444982psjww"
+  },
+  {
+    "sistem": "",
+    "kendala": "Rem macet (Belakang)",
+    "kategori": "Towing",
+    "explain": "- Jika diluar jam kerja (07:00-23:00)
+- Unsolved di storing jika sudah validasi rem belakang terkunci dan tidak berhasil disolved maka Towing karena masalahnya ada di BLDC",
+    "edu": "",
+    "id": "k1784705444982amq05"
+  },
+  {
+    "sistem": "",
+    "kendala": "Ban Bocor / Ban Sobek / Ban Pecah",
+    "kategori": "Edukasi",
+    "explain": "Minta foto/video kondisi ban untuk divalidasi. Jika ban tidak bisa digunakan (ban keluar dari velg), lanjut Towing. Jika masih bisa ditangani, arahkan ke bengkel umum / bengkel rekanan / pool terdekat.",
+    "edu": "Halo Bapak/Ibu, mohon bantu mengirimkan foto atau video yang memperlihatkan kondisi ban motor saat ini ya.
+
+Apabila dari hasil pengecekan ban terlihat sudah tidak aman untuk digunakan, kami akan membantu mengajukan proses towing.
+
+Namun, apabila kondisi ban masih dapat ditangani, kami akan mengarahkan Bapak/Ibu untuk melakukan perbaikan di bengkel umum, bengkel rekanan, atau pool Electrum terdekat. Terima kasih.",
+    "id": "k178470544498264v2j"
+  },
+  {
+    "sistem": "",
+    "kendala": "Ban Bocor / Ban Sobek / Ban Pecah",
+    "kategori": "Towing",
+    "explain": "- Jika diluar jam kerja (07:00-23:00)
+- Unsolved di education jika CS L2 Bike sudah validasi ban tidak bisa digunakan dan unit tidak aman dikendarai",
+    "edu": "",
+    "id": "k1784705444982xvrtk"
+  },
+  {
+    "sistem": "",
+    "kendala": "Jok tidak bisa dibuka",
+    "kategori": "Storing",
+    "explain": "Perbaikan tali jok.",
+    "edu": "",
+    "id": "k1784705444982o5gqi"
+  },
+  {
+    "sistem": "",
+    "kendala": "Velg bengkok / rusak",
+    "kategori": "Towing",
+    "explain": "Minta foto/video kondisi velg untuk divalidasi. Jika velg tidak bisa digunakan, maka Towing.",
+    "edu": "",
+    "id": "k1784705444982fz4vt"
+  },
+  {
+    "sistem": "",
+    "kendala": "Bearing roda rusak",
+    "kategori": "Edukasi",
+    "explain": "Minta foto/video kondisi velg/bearing untuk divalidasi. Jika velg tidak terlihat goyang atau pelor bagian dalam tidak hancur/ada (masih bisa dijalankan) maka diarahkan ke pool terdekat.",
+    "edu": "Halo Bapak/Ibu,
+
+Untuk pemeriksaan lebih lanjut, boleh tolong melakukan video dengan langkah-langkah sebagai berikut:
+1. Pastikan motor dalam kondisi mati dan berada di tempat yang aman.
+2. Putar roda depan atau belakang secara perlahan, lalu perhatikan apakah terdengar suara kasar, berdengung, atau putaran roda terasa seret.
+3. Goyangkan roda ke arah kanan-kiri secara perlahan untuk memastikan tidak terdapat kelonggaran yang berlebihan.
+4. Apabila terdengar suara tidak normal, roda terasa seret, atau terdapat kelonggaran, mohon untuk tidak memaksakan penggunaan motor.
+
+Jika velg tidak terlihat goyang atau pelor bagian dalam tidak hancur/ada (masih bisa dijalankan), mohon kesediaan Bapak/Ibu untuk membawa motor ke pool Electrum terdekat agar dapat dilakukan pengecekan lebih lanjut.
+
+Apabila kondisi motor sudah tidak aman atau tidak dapat digunakan, mohon informasikan kembali kepada kami agar dapat kami bantu dengan proses Towing. Terima kasih.",
+    "id": "k1784705444982bsa8p"
+  },
+  {
+    "sistem": "",
+    "kendala": "Bearing roda rusak (sudah tidak bisa dijalankan)",
+    "kategori": "Towing",
+    "explain": "- Jika diluar jam kerja (07:00-23:00)
+- Minta foto/video kondisi velg/bearing untuk divalidasi. Jika velg terlihat goyang atau pelor bagian dalam hancur/tidak ada, maka Towing",
+    "edu": "",
+    "id": "k1784705444982m5myo"
+  },
+  {
+    "sistem": "",
+    "kendala": "Segitiga rusak",
+    "kategori": "Towing",
+    "explain": "Minta foto/video kondisi stang untuk divalidasi. Jika stang terlihat miring atau tidak sejajar, maka Towing.",
+    "edu": "",
+    "id": "k1784705444982mk3yt"
+  },
+  {
+    "sistem": "",
+    "kendala": "Gear ratio roda belakang H5 rusak",
+    "kategori": "Towing",
+    "explain": "Minta video kondisi ban diputar atau digas untuk divalidasi. Jika ban ketika diputar atau digas menimbulkan suara berat atau bising, maka Towing.",
+    "edu": "",
+    "id": "k1784705444982isscz"
+  },
+  {
+    "sistem": "",
+    "kendala": "Seat burrel / Bagasi jebol",
+    "kategori": "Towing",
+    "explain": "Pergantian Seat burrel / Bagasi port di Pool.",
+    "edu": "",
+    "id": "k1784705444982nrdhs"
+  },
+  {
+    "sistem": "",
+    "kendala": "E07 (H3) roda belakang nyangkut / BLDC rusak",
+    "kategori": "Towing",
+    "explain": "Perbaikan BLDC set / Pergantian BLDC set di Pool.",
+    "edu": "",
+    "id": "k17847054449821r3il"
+  },
+  {
+    "sistem": "",
+    "kendala": "E05 (H1) roda belakang nyangkut / BLDC rusak",
+    "kategori": "Towing",
+    "explain": "Perbaikan BLDC set / Pergantian BLDC set di Pool.",
+    "edu": "",
+    "id": "k1784705444982oxxtu"
+  },
+  {
+    "sistem": "",
+    "kendala": "Main cable (H1 / H3 / H5)",
+    "kategori": "Towing",
+    "explain": "Perbaikan Main cable set / Pergantian main cable set.",
+    "edu": "",
+    "id": "k1784705444982irw3e"
+  },
+  {
+    "sistem": "",
+    "kendala": "Port battery rusak / korosi",
+    "kategori": "Towing",
+    "explain": "Perbaikan Port baterai / Pergantian Port baterai di Pool.",
+    "edu": "",
+    "id": "k1784705444982ran2c"
+  },
+  {
+    "sistem": "",
+    "kendala": "Laka lantas",
+    "kategori": "Towing",
+    "explain": "Proses asuransi jika unit masuk kategori dan syarat SIM driver harus aktif.",
+    "edu": "",
+    "id": "k1784705444982fozmw"
+  },
+  {
+    "sistem": "",
+    "kendala": "Alarm tidak bisa mati",
+    "kategori": "Storing",
+    "explain": "Pergantian soket alarm.",
+    "edu": "",
+    "id": "k17847054449824pf9j"
+  },
+  {
+    "sistem": "",
+    "kendala": "E14",
+    "kategori": "Edukasi",
+    "explain": "Kirim video edukasi Kode E14
+
+https://drive.google.com/file/d/13KRsAbcSG7qQ23fCafRpDOU7A0-hc9rk/view?usp=sharing",
+    "edu": "Mohon kesediaan Bapak/Ibu untuk mengikuti panduan pada video berikut dan melakukan langkah-langkah sesuai dengan informasi yang disampaikan. 
+
+https://drive.google.com/file/d/13KRsAbcSG7qQ23fCafRpDOU7A0-hc9rk/view?usp=sharing
+
+Apabila setelah mengikuti panduan tersebut kendala masih terjadi, mohon informasikan kembali kepada kami. Selanjutnya, kami akan meneruskan laporan Bapak/Ibu kepada tim terkait untuk dilakukan pengecekan lebih lanjut. Terima kasih.",
+    "id": "k1784705444982yp0j9"
+  },
+  {
+    "sistem": "",
+    "kendala": "E14",
+    "kategori": "Storing",
+    "explain": "Pergantian Right Combination Switch.",
+    "edu": "",
+    "id": "k1784705444982z28iu"
+  },
+  {
+    "sistem": "",
+    "kendala": "E02",
+    "kategori": "Edukasi",
+    "explain": "Cek dulu baterainya → jika aman diarahkan ke BSS, jika tidak dicek port baterainya.",
+    "edu": "Halo Bapak/Ibu, terkait kendala kode E02 yang muncul pada layar speedometer, mohon kesediaannya untuk mencoba menukarkan baterai dengan baterai yang baru di BSS terlebih dahulu.
+
+Apabila setelah penukaran baterai kendala masih muncul, mohon informasikan kembali kepada kami agar dapat kami bantu melakukan pengecekan lebih lanjut.",
+    "id": "k1784705444982jdd39"
+  },
+  {
+    "sistem": "",
+    "kendala": "E02",
+    "kategori": "Storing",
+    "explain": "Cek dulu baterainya → jika aman diarahkan ke BSS, jika tidak dicek port baterainya.",
+    "edu": "",
+    "id": "k1784705444982ik835"
+  },
+  {
+    "sistem": "",
+    "kendala": "Speedometer mati",
+    "kategori": "Storing",
+    "explain": "Unit bisa jalan, diarahkan datang ke pool.",
+    "edu": "",
+    "id": "k1784705444982ejtnl"
+  },
+  {
+    "sistem": "",
+    "kendala": "E03",
+    "kategori": "Storing",
+    "explain": "Pergantian controller.",
+    "edu": "",
+    "id": "k1784705444982p1127"
+  },
+  {
+    "sistem": "",
+    "kendala": "E03",
+    "kategori": "Towing",
+    "explain": "Jika diluar jam kerja (07:00-23:00).",
+    "edu": "",
+    "id": "k1784705444982nrtay"
+  },
+  {
+    "sistem": "",
+    "kendala": "Komstir patah",
+    "kategori": "Towing",
+    "explain": "Pergantian komstir dan segitiga.",
+    "edu": "",
+    "id": "k1784705444982z8mez"
+  },
+  {
+    "sistem": "",
+    "kendala": "Shockbreaker copot",
+    "kategori": "Towing",
+    "explain": "Pergantian segitiga.",
+    "edu": "",
+    "id": "k1784705444982mvryh"
+  },
+  {
+    "sistem": "",
+    "kendala": "Mati total",
+    "kategori": "Towing",
+    "explain": "Cek keseluruhan unit.",
+    "edu": "",
+    "id": "k1784705444982cfao4"
+  },
+  {
+    "sistem": "",
+    "kendala": "Klaher / Bearing",
+    "kategori": "Storing",
+    "explain": "Pergantian bearing / velg.",
+    "edu": "",
+    "id": "k1784705444982rsd3q"
+  },
+  {
+    "sistem": "",
+    "kendala": "Klaher / Bearing",
+    "kategori": "Towing",
+    "explain": "Jika diluar jam kerja (07:00-23:00).",
+    "edu": "",
+    "id": "k1784705444982bz5wh"
+  }
+];
+
+// Media bawaan (foto/video default, disimpan sebagai file statis di folder /media)
+const STATIC_MEDIA = {
+  "k1784705444982yp0j9": ["media/E14_1.mp4"],
+  "k1784705444982dtc5w": ["media/E15__Hall_Gas____Gas_tidak_berfungsi_1.mp4"],
+  "k17847054449822wye8": ["media/E28__Sensor_Rem__1.mp4"],
+  "k1784705444982irp6n": ["media/Mode___Kode_P_1.mp4", "media/Mode___Kode_P_2.mp4"],
+  "k1784705444982fz4vt": ["media/Velg_bengkok___rusak_1.png"]
+};
+
+function uid(){ return 'k' + Date.now() + Math.random().toString(36).slice(2,7); }
+
+function loadItems(){
+  try{
+    const data = localStorage.getItem(KEY_ITEMS);
+    if(data){
+      allItems = JSON.parse(data);
+    } else {
+      allItems = SEED.map(s => ({...s}));
+      saveItems();
+    }
+  }catch(e){
+    allItems = SEED.map(s => ({...s}));
+    saveItems();
+  }
+  render();
+}
+
+function saveItems(){
+  try{ 
+    localStorage.setItem(KEY_ITEMS, JSON.stringify(allItems)); 
+  }catch(e){ 
+    console.error('Simpan gagal:', e); 
+  }
+}
+
+function computeStageMap(items){
+  const order = ['Edukasi','Storing','Towing'];
+  const groups = {};
+  items.forEach(it=>{
+    if(!groups[it.kendala]) groups[it.kendala] = new Set();
+    groups[it.kendala].add(it.kategori);
+  });
+  const map = {};
+  Object.keys(groups).forEach(k=>{
+    const present = order.filter(o => groups[k].has(o));
+    const m = {};
+    present.forEach((cat, idx) => { m[cat] = idx + 1; });
+    map[k] = m;
+  });
+  return map;
+}
+
+function stageLabel(item, stageMap){
+  const m = stageMap[item.kendala];
+  const num = m ? m[item.kategori] : 1;
+  return 'Tahap ' + (num || 1);
+}
+
+function matchesFilter(item){
+  if(currentFilter !== 'all' && item.kategori !== currentFilter) return false;
+  if(currentSearch){
+    const s = currentSearch.toLowerCase();
+    return item.kendala.toLowerCase().includes(s) || (item.sistem||'').toLowerCase().includes(s) || (item.explain||'').toLowerCase().includes(s);
+  }
+  return true;
+}
+
+// Fungsi helper Copy ke Clipboard
+function copyToClipboard(text, btnElement){
+  if(!text){
+    alert('Tidak ada teks untuk disalin.');
+    return;
+  }
+  navigator.clipboard.writeText(text).then(()=>{
+    const originalText = btnElement.textContent;
+    btnElement.textContent = '✓ Copied!';
+    btnElement.classList.add('copied');
+    setTimeout(()=>{
+      btnElement.textContent = originalText;
+      btnElement.classList.remove('copied');
+    }, 2000);
+  }).catch(err => {
+    alert('Gagal menyalin teks: ' + err);
+  });
+}
+
+function render(){
+  const listEl = document.getElementById('list');
+  const filtered = allItems.filter(matchesFilter);
+  const stageMap = computeStageMap(allItems);
+  document.getElementById('countPill').textContent = filtered.length + ' dari ' + allItems.length + ' kendala';
+  document.getElementById('emptyMsg').style.display = filtered.length ? 'none' : 'block';
+  listEl.innerHTML = '';
+  
+  filtered.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'card ' + item.kategori;
+    card.dataset.id = item.id;
+    card.innerHTML = `
+      <div class="card-top">
+        <div>
+          <div class="card-title">${escapeHtml(item.kendala)}</div>
+          <div class="sistem-tag">${stageLabel(item, stageMap)}</div>
+        </div>
+        <div class="badge ${item.kategori}">${item.kategori}</div>
+      </div>
+      
+      <div class="section-header">
+        <div class="explain-lbl">Explanation</div>
+        <button class="copy-btn" data-copy="explain">📋 Copy Text</button>
+      </div>
+      <textarea class="explain-textarea" data-field="explain" placeholder="Jelaskan tindakan penanganan...">${escapeHtml(item.explain||'')}</textarea>
+      
+      ${item.kategori === 'Edukasi' ? `
+      <div class="edu-box">
+        <div class="section-header">
+          <div class="explain-lbl">Template Edukasi (bisa diisi/diedit manual)</div>
+          <button class="copy-btn" data-copy="edu">📋 Copy Text</button>
+        </div>
+        <textarea data-field="edu" placeholder="Tulis naskah edukasi untuk driver...">${escapeHtml(item.edu||'')}</textarea>
+      </div>` : ''}
+      
+      <div class="media-grid-container"></div>
+      <div class="row-actions">
+        <label class="mini-btn" style="cursor:pointer;">📎 Tambah Media (Bisa Banyak)
+          <input type="file" class="file-input" accept="image/*,video/*" multiple data-action="media">
+        </label>
+        <button class="mini-btn danger" data-action="delete">🗑 Hapus Kendala</button>
+      </div>
+    `;
+    listEl.appendChild(card);
+    
+    // Render Galeri Media
+    loadMediaGallery(item.id, card.querySelector('.media-grid-container'));
+
+    // Input Teks
+    const explainInput = card.querySelector('[data-field="explain"]');
+    explainInput.addEventListener('input', (e)=>{
+      item.explain = e.target.value;
+      saveItems();
+    });
+
+    const eduInput = card.querySelector('[data-field="edu"]');
+    if(eduInput){
+      eduInput.addEventListener('input', (e)=>{
+        item.edu = e.target.value;
+        saveItems();
+      });
+    }
+
+    // Event Listener Tombol Copy
+    card.querySelectorAll('[data-copy]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetType = btn.dataset.copy;
+        const textToCopy = targetType === 'explain' ? explainInput.value : (eduInput ? eduInput.value : '');
+        copyToClipboard(textToCopy, btn);
+      });
+    });
+
+    // Hapus Kendala Total
+    card.querySelector('[data-action="delete"]').addEventListener('click', async ()=>{
+      if(!confirm('Hapus kendala "'+item.kendala+'"?')) return;
+      allItems = allItems.filter(x => x.id !== item.id);
+      saveItems();
+      await deleteAllMediaDB(item.id);
+      render();
+    });
+
+    // Upload Media Tambahan
+    card.querySelector('[data-action="media"]').addEventListener('change', async (e)=>{
+      const files = Array.from(e.target.files);
+      if(!files.length) return;
+      await handleMediaUpload(files, item.id, card.querySelector('.media-grid-container'));
+    });
+  });
+}
+
+async function loadMediaGallery(id, containerEl){
+  try{
+    const fileList = await getMediaDB(id);
+    renderGallery(id, fileList, containerEl);
+  }catch(e){ console.error(e); }
+}
+
+function renderGallery(id, fileList, containerEl){
+  containerEl.innerHTML = '';
+  const staticFiles = STATIC_MEDIA[id] || [];
+  if((!staticFiles || !staticFiles.length) && (!fileList || !fileList.length)) return;
+
+  const grid = document.createElement('div');
+  grid.className = 'media-grid';
+
+  // Media bawaan (statis dari folder /media, tampil untuk semua pengunjung)
+  staticFiles.forEach((path) => {
+    const itemEl = document.createElement('div');
+    itemEl.className = 'media-item';
+    const isVideo = /\.(mp4|webm|mov|ogg)$/i.test(path);
+    const mediaHtml = isVideo
+      ? `<video controls src="${path}"></video>`
+      : `<img src="${path}">`;
+    itemEl.innerHTML = mediaHtml;
+    grid.appendChild(itemEl);
+  });
+
+  // Media tambahan (diupload manual, tersimpan lokal di browser via IndexedDB)
+  (fileList || []).forEach((fileBlob, index) => {
+    const itemEl = document.createElement('div');
+    itemEl.className = 'media-item';
+    const url = URL.createObjectURL(fileBlob);
+
+    const mediaHtml = fileBlob.type.startsWith('video/')
+      ? `<video controls src="${url}"></video>`
+      : `<img src="${url}">`;
+
+    itemEl.innerHTML = `
+      ${mediaHtml}
+      <div class="del-media-bar">
+        <button class="btn-del-media">✕ Hapus File Ini</button>
+      </div>
+    `;
+
+    // Event Hapus Single Media
+    itemEl.querySelector('.btn-del-media').addEventListener('click', async ()=>{
+      if(confirm('Hapus file media ini?')){
+        const updatedList = await deleteSingleMediaDB(id, index);
+        renderGallery(id, updatedList, containerEl);
+      }
+    });
+
+    grid.appendChild(itemEl);
+  });
+
+  containerEl.appendChild(grid);
+}
+
+async function handleMediaUpload(files, id, containerEl){
+  try{
+    const updatedList = await addMediaDB(id, files);
+    renderGallery(id, updatedList, containerEl);
+  }catch(e){
+    alert('Gagal mengunggah media: ' + e.message);
+  }
+}
+
+function escapeHtml(str){
+  if(!str) return '';
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+// ---------- Toolbar events ----------
+document.getElementById('searchBox').addEventListener('input', (e)=>{
+  currentSearch = e.target.value.trim();
+  render();
+});
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.f;
+    render();
+  });
+});
+
+// ---------- Form Tambah Kendala ----------
+const addForm = document.getElementById('addForm');
+document.getElementById('toggleAddBtn').addEventListener('click', ()=>{
+  addForm.classList.toggle('open');
+});
+document.getElementById('cancelAddBtn').addEventListener('click', ()=>{
+  addForm.classList.remove('open');
+  clearAddForm();
+});
+document.getElementById('f-kategori').addEventListener('change', (e)=>{
+  document.getElementById('f-edu-label').style.display = e.target.value === 'Edukasi' ? 'flex' : 'none';
+});
+
+function clearAddForm(){
+  document.getElementById('f-kendala').value = '';
+  document.getElementById('f-sistem').value = '';
+  document.getElementById('f-kategori').value = 'Storing';
+  document.getElementById('f-explain').value = '';
+  document.getElementById('f-edutemplate').value = '';
+  document.getElementById('f-media').value = '';
+  document.getElementById('f-edu-label').style.display = 'none';
+}
+
+document.getElementById('saveNewBtn').addEventListener('click', async ()=>{
+  const kendala = document.getElementById('f-kendala').value.trim();
+  const statusEl = document.getElementById('addStatus');
+  const saveBtn = document.getElementById('saveNewBtn');
+
+  if(!kendala){
+    statusEl.textContent = '⚠️ Nama kendala wajib diisi.';
+    statusEl.className = 'status'; statusEl.style.color = '#e0433a'; statusEl.style.display='inline-block';
+    return;
+  }
+
+  saveBtn.disabled = true;
+  statusEl.textContent = 'Menyimpan...';
+  statusEl.className = 'status ok';
+
+  const newItem = {
+    id: uid(),
+    sistem: document.getElementById('f-sistem').value.trim(),
+    kendala,
+    kategori: document.getElementById('f-kategori').value,
+    explain: document.getElementById('f-explain').value.trim(),
+    edu: document.getElementById('f-edutemplate').value.trim()
+  };
+
+  const files = Array.from(document.getElementById('f-media').files);
+  if(files.length > 0){
+    try{
+      await addMediaDB(newItem.id, files);
+    }catch(e){ console.error(e); }
+  }
+
+  allItems.unshift(newItem);
+  saveItems();
+
+  saveBtn.disabled = false;
+  clearAddForm();
+  addForm.classList.remove('open');
+  render();
+});
+
+// Load awal
+loadItems();
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  if(!confirm('Ini akan MENGGANTI seluruh daftar kendala saat ini dengan data resmi terbaru. Lanjutkan?')) return;
+  allItems = SEED.map(s => ({...s}));
+  saveItems();
+  render();
+  alert('Data resmi berhasil dimuat ulang.');
+});
+</script>
+</body>
+</html>
